@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task/Bloc/scheme_bloc.dart';
 import 'dart:convert';
-
 import '../Constant.dart';
 
 class SchemeScreen extends StatefulWidget {
@@ -11,10 +10,8 @@ class SchemeScreen extends StatefulWidget {
 }
 
 class _SchemeScreenState extends State<SchemeScreen> {
-
   int currentPage = 1;
-  var totalPage ;
-  bool loading = false;
+  var totalPage;
   ScrollController _scrollController = ScrollController();
 
   @override
@@ -22,25 +19,17 @@ class _SchemeScreenState extends State<SchemeScreen> {
     super.initState();
     context.read<SchemeBloc>().add(FetchSchemeEvent(currentPage));
     _scrollController.addListener(_onScroll);
-    // fetchSchemes();
   }
 
-  void _onScroll(){
+  void _onScroll() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-      if(currentPage < totalPage){
-        loading = true;
-        setState(() {
-
-        });
+      if (currentPage < totalPage) {
         context.read<SchemeBloc>().add(FetchSchemeEvent(++currentPage, pagination: true));
       }
     }
   }
 
-
-
   var searchController = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +62,7 @@ class _SchemeScreenState extends State<SchemeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: TextField(
                   controller: searchController,
-                  onChanged: (value) {
-
-                  },
+                  onChanged: (value) {},
                   decoration: InputDecoration(
                     hintText: "enter... unit no type status",
                     hintStyle: TextStyle(color: Colors.grey.shade400),
@@ -96,22 +83,21 @@ class _SchemeScreenState extends State<SchemeScreen> {
         ),
       ),
       body: BlocBuilder<SchemeBloc, SchemeState>(
-          builder: (context, state) {
-            if(state is SchemeLoading){
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if(state is SchemeSuccess){
-              currentPage = state.schemeModel.result!.properties!.currentPage!;
-              totalPage = state.schemeModel.result?.properties?.lastPage;
-              // loading = false;
+        builder: (context, state) {
+          if (state is SchemeLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (state is SchemeSuccess) {
+            currentPage = state.schemeModel.result!.properties!.currentPage!;
+            totalPage = state.schemeModel.result?.properties?.lastPage;
 
-              return ListView(
-                controller: _scrollController,
-                children: [
-                  ListView.builder(
-                    shrinkWrap: true,
+            return ListView(
+              controller: _scrollController,
+              children: [
+                ListView.builder(
+                  shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: state.schemeModel.result?.properties?.data?.length,
                   itemBuilder: (context, index) {
@@ -119,7 +105,9 @@ class _SchemeScreenState extends State<SchemeScreen> {
                     var status = data?.propertyStatus == '1' ? 'Available' : data?.propertyStatus == '2' ? 'Book' : data?.propertyStatus == '3' ? 'Hold' : data?.propertyStatus == '4' ? 'Cancel' : 'Complete';
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: ExpansionTile(backgroundColor: Colors.blue.shade50,collapsedBackgroundColor: Colors.blue.shade50,
+                      child: ExpansionTile(
+                        backgroundColor: Colors.blue.shade50,
+                        collapsedBackgroundColor: Colors.blue.shade50,
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -127,7 +115,7 @@ class _SchemeScreenState extends State<SchemeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('${data?.plotType}-${data?.plotName}', style: TextStyle(fontWeight: FontWeight.bold, color: Constant.bgText),),
-                                Text('${data?.schemeName}', style: TextStyle( color: Colors.grey, fontSize: 14)),
+                                Text('${data?.schemeName}', style: TextStyle(color: Colors.grey, fontSize: 14)),
                               ],
                             ),
                             Text(status, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))
@@ -151,22 +139,20 @@ class _SchemeScreenState extends State<SchemeScreen> {
                               ),
                             ),
                           ],
-
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Container(
-                                  height: 40,
-                                  width: 120,
-                                  margin: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                                  decoration: BoxDecoration(
-                                      color: Constant.bgText,
-                                      borderRadius: BorderRadius.circular(20)
-                                  ),
-                                  child: Center(
-                                    child: Text('Book/Hold', style: TextStyle(color: Colors.white),),
-                                  )
-
+                                height: 40,
+                                width: 120,
+                                margin: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Constant.bgText,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Center(
+                                  child: Text('Book/Hold', style: TextStyle(color: Colors.white),),
+                                ),
                               )
                             ],
                           )
@@ -175,24 +161,25 @@ class _SchemeScreenState extends State<SchemeScreen> {
                     );
                   },
                 ),
-                currentPage != totalPage && loading == true
-                ? Container(
-                height: 40,
-                width: MediaQuery.of(context).size.width,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ) : SizedBox(),]
-              );
-            }
-            if(state is SchemeError){
-              return Center(
-                child: Text(state.error),
-              );
-            }
-            return const SizedBox();
-          },
-        ),
+                if (currentPage != totalPage)
+                  Container(
+                    height: 40,
+                    width: MediaQuery.of(context).size.width,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+              ],
+            );
+          }
+          if (state is SchemeError) {
+            return Center(
+              child: Text(state.error),
+            );
+          }
+          return const SizedBox();
+        },
+      ),
     );
   }
 }
